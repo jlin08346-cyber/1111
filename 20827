@@ -1,0 +1,65 @@
+const size = 4; // 4x4 盤面
+let moves = 0;
+let gridData = [];
+const gridElement = document.getElementById('grid');
+const movesDisplay = document.getElementById('moves');
+
+// 初始化遊戲
+function initGame() {
+    moves = 0;
+    movesDisplay.innerText = moves;
+    gridData = [];
+    gridElement.innerHTML = '';
+
+    for (let i = 0; i < size * size; i++) {
+        // 隨機初始顏色 (0 或 1)
+        const state = Math.random() > 0.5 ? 1 : 0;
+        gridData.push(state);
+
+        const cell = document.createElement('div');
+        cell.className = `cell color-${state}`;
+        cell.dataset.index = i;
+        cell.onclick = () => toggle(i);
+        gridElement.appendChild(cell);
+    }
+}
+
+// 切換自己與鄰居的顏色
+function toggle(index) {
+    moves++;
+    movesDisplay.innerText = moves;
+
+    const targets = [
+        index, // 自己
+        index - size, // 上
+        index + size, // 下
+        index % size !== 0 ? index - 1 : -1, // 左
+        index % size !== size - 1 ? index + 1 : -1 // 右
+    ];
+
+    targets.forEach(idx => {
+        if (idx >= 0 && idx < size * size) {
+            gridData[idx] = 1 - gridData[idx]; // 0變1, 1變0
+            updateCellVisual(idx);
+        }
+    });
+
+    checkWin();
+}
+
+function updateCellVisual(index) {
+    const cell = gridElement.children[index];
+    cell.className = `cell color-${gridData[index]}`;
+}
+
+function checkWin() {
+    const allSame = gridData.every(val => val === gridData[0]);
+    if (allSame) {
+        setTimeout(() => {
+            alert(`恭喜破關！總共花了 ${moves} 步。`);
+            initGame();
+        }, 300);
+    }
+}
+
+initGame();
